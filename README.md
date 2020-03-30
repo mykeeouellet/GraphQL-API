@@ -1,7 +1,7 @@
-# GraphQL-API
 
-Test Master
-Test branch Mykee
-Test Branch Mykee 2
+GraphQL API // Codeboxx Week-8
+
+This project is using Node.js and Express to create a GraphQL Api.
+
 
 
