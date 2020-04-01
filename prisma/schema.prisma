@@ -1,0 +1,341 @@
+// generator client {
+//   provider = "prisma-client-js"
+// }
+
+datasource mysql {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model active_storage_attachments {
+  blob_id              Int
+  created_at           DateTime
+  id                   Int                  @default(autoincrement()) @id
+  name                 String
+  record_id            Int
+  record_type          String
+  active_storage_blobs active_storage_blobs @relation(fields: [blob_id], references: [id])
+
+  @@index([blob_id], name: "index_active_storage_attachments_on_blob_id")
+  @@unique([record_type, record_id, name, blob_id], name: "index_active_storage_attachments_uniqueness")
+}
+
+model active_storage_blobs {
+  byte_size                  Int
+  checksum                   String
+  content_type               String?
+  created_at                 DateTime
+  filename                   String
+  id                         Int                          @default(autoincrement()) @id
+  key                        String                       @unique
+  metadata                   String?
+  active_storage_attachments active_storage_attachments[]
+}
+
+model addresses {
+  address_notes      String?
+  address_status     String?
+  address_type       String?
+  city               String?
+  country            String?
+  created_at         DateTime
+  entity_id          Int?
+  entity_type        String?
+  id                 Int      @default(autoincrement()) @id
+  latitude           String?
+  longitude          String?
+  postal_code        String?
+  street_name        String?
+  street_number      String?
+  suite_or_apartment String?
+  updated_at         DateTime
+
+  @@index([entity_type, entity_id], name: "index_addresses_on_entity_type_and_entity_id")
+}
+
+model ar_internal_metadata {
+  created_at DateTime
+  key        String   @id
+  updated_at DateTime
+  value      String?
+}
+
+model batteries {
+  battery_commissioning_date    DateTime?
+  battery_information           String?
+  battery_last_inspection_date  DateTime?
+  battery_notes                 String?
+  battery_operation_certificate String?
+  battery_status                String?
+  building_id                   Int?
+  building_type                 String?
+  created_at                    DateTime
+  employee_id                   Int?
+  id                            Int        @default(autoincrement()) @id
+  updated_at                    DateTime
+  buildings                     buildings? @relation(fields: [building_id], references: [id])
+  employees                     employees? @relation(fields: [employee_id], references: [id])
+  columns                       columns[]
+
+  @@index([building_id], name: "index_batteries_on_building_id")
+  @@index([employee_id], name: "index_batteries_on_employee_id")
+}
+
+model blazer_audits {
+  created_at  DateTime?
+  data_source String?
+  id          Int       @default(autoincrement()) @id
+  query_id    Int?
+  statement   String?
+  user_id     Int?
+
+  @@index([query_id], name: "index_blazer_audits_on_query_id")
+  @@index([user_id], name: "index_blazer_audits_on_user_id")
+}
+
+model blazer_checks {
+  check_type     String?
+  created_at     DateTime
+  creator_id     Int?
+  emails         String?
+  id             Int       @default(autoincrement()) @id
+  last_run_at    DateTime?
+  message        String?
+  query_id       Int?
+  schedule       String?
+  slack_channels String?
+  state          String?
+  updated_at     DateTime
+
+  @@index([creator_id], name: "index_blazer_checks_on_creator_id")
+  @@index([query_id], name: "index_blazer_checks_on_query_id")
+}
+
+model blazer_dashboards {
+  created_at DateTime
+  creator_id Int?
+  id         Int      @default(autoincrement()) @id
+  name       String?
+  updated_at DateTime
+
+  @@index([creator_id], name: "index_blazer_dashboards_on_creator_id")
+}
+
+model blazer_dashboard_queries {
+  created_at   DateTime
+  dashboard_id Int?
+  id           Int      @default(autoincrement()) @id
+  position     Int?
+  query_id     Int?
+  updated_at   DateTime
+
+  @@index([dashboard_id], name: "index_blazer_dashboard_queries_on_dashboard_id")
+  @@index([query_id], name: "index_blazer_dashboard_queries_on_query_id")
+}
+
+model blazer_queries {
+  created_at  DateTime
+  creator_id  Int?
+  data_source String?
+  description String?
+  id          Int      @default(autoincrement()) @id
+  name        String?
+  statement   String?
+  updated_at  DateTime
+
+  @@index([creator_id], name: "index_blazer_queries_on_creator_id")
+}
+
+model buildings {
+  building_administrator_email         String?
+  building_administrator_full_name     String?
+  building_administrator_phone         String?
+  building_technical_contact_email     String?
+  building_technical_contact_full_name String?
+  building_technical_contact_phone     String?
+  created_at                           DateTime
+  customer_id                          Int?
+  id                                   Int                @default(autoincrement()) @id
+  updated_at                           DateTime
+  customers                            customers?         @relation(fields: [customer_id], references: [id])
+  batteries                            batteries[]
+  building_details                     building_details[]
+
+  @@index([customer_id], name: "index_buildings_on_customer_id")
+}
+
+model building_details {
+  building_id     Int?
+  created_at      DateTime
+  id              Int        @default(autoincrement()) @id
+  information_key String?
+  updated_at      DateTime
+  value           String?
+  buildings       buildings? @relation(fields: [building_id], references: [id])
+
+  @@index([building_id], name: "index_building_details_on_building_id")
+}
+
+model columns {
+  battery_id          Int?
+  building_type       String?
+  column_information  String?
+  column_notes        String?
+  column_status       String?
+  created_at          DateTime
+  id                  Int         @default(autoincrement()) @id
+  served_floor_number Int?
+  updated_at          DateTime
+  batteries           batteries?  @relation(fields: [battery_id], references: [id])
+  elevators           elevators[]
+
+  @@index([battery_id], name: "index_columns_on_battery_id")
+}
+
+model customers {
+  company_contact_email                 String?
+  company_contact_full_name             String?
+  company_contact_phone                 String?
+  company_description                   String?
+  company_name                          String?
+  created_at                            DateTime
+  id                                    Int         @default(autoincrement()) @id
+  quote_id                              Int?
+  service_technical_authority_email     String?
+  service_technical_authority_full_name String?
+  service_technical_authority_phone     String?
+  updated_at                            DateTime
+  user_id                               Int?
+  quotes                                quotes?     @relation(fields: [quote_id], references: [id])
+  users                                 users?      @relation(fields: [user_id], references: [id])
+  buildings                             buildings[]
+
+  @@index([quote_id], name: "index_customers_on_quote_id")
+  @@index([user_id], name: "index_customers_on_user_id")
+}
+
+model elevators {
+  building_type                   String?
+  column_id                       Int?
+  created_at                      DateTime
+  elevator_commissioning_date     DateTime?
+  elevator_information            String?
+  elevator_inspection_certificate String?
+  elevator_last_inspection_date   DateTime?
+  elevator_model                  String?
+  elevator_notes                  String?
+  elevator_serial_number          Int?
+  elevator_status                 String?
+  id                              Int       @default(autoincrement()) @id
+  updated_at                      DateTime
+  columns                         columns?  @relation(fields: [column_id], references: [id])
+
+  @@index([column_id], name: "index_elevators_on_column_id")
+}
+
+model employees {
+  confirmation_sent_at   DateTime?
+  confirmation_token     String?
+  confirmed_at           DateTime?
+  created_at             DateTime
+  current_sign_in_at     DateTime?
+  current_sign_in_ip     String?
+  email                  String      @default("") @unique
+  encrypted_password     String      @default("")
+  failed_attempts        Int         @default(0)
+  firstname              String
+  function               String
+  id                     Int         @default(autoincrement()) @id
+  lastname               String
+  last_sign_in_at        DateTime?
+  last_sign_in_ip        String?
+  locked_at              DateTime?
+  remember_created_at    DateTime?
+  reset_password_sent_at DateTime?
+  reset_password_token   String?     @unique
+  sign_in_count          Int         @default(0)
+  unconfirmed_email      String?
+  unlock_token           String?
+  updated_at             DateTime
+  batteries              batteries[]
+}
+
+model leads {
+  // This type is currently not supported.
+  // attachment         binary?
+  created_at            DateTime
+  department_of_service String?
+  id                    Int      @default(autoincrement()) @id
+  lead_company_name     String?
+  lead_email            String?
+  lead_full_name        String?
+  lead_message          String?
+  lead_phone            String?
+  project_description   String?
+  project_name          String?
+  updated_at            DateTime
+  quotes                quotes[]
+}
+
+model quotes {
+  BuildingType         String?
+  created_at           DateTime?
+  ElevatorCost         Float?
+  ElevatorQuality      String?
+  email                String?
+  id                   Int         @default(autoincrement()) @id
+  InstallationPrice    Float?
+  lead_id              Int?
+  NbrAppt              Int?
+  NbrBassements        Int?
+  NbrBusinesses        Int?
+  NbrElevators         Int?
+  NbrFloors            String?
+  NbrOccupanrtPerFloor Int?
+  NbrParking           Int?
+  NbrRentalCompagnies  Int?
+  TotalPrice           Float?
+  user_id              Int?
+  WorkingHours         DateTime?
+  leads                leads?      @relation(fields: [lead_id], references: [id])
+  users                users?      @relation(fields: [user_id], references: [id])
+  customers            customers[]
+
+  @@index([lead_id], name: "index_quotes_on_lead_id")
+  @@index([user_id], name: "index_quotes_on_user_id")
+}
+
+model schema_migrations {
+  version String @id
+}
+
+model text_to_speeches {
+  created_at DateTime
+  id         Int      @default(autoincrement()) @id
+  updated_at DateTime
+}
+
+model users {
+  confirmation_sent_at   DateTime?
+  confirmation_token     String?
+  confirmed_at           DateTime?
+  created_at             DateTime
+  current_sign_in_at     DateTime?
+  current_sign_in_ip     String?
+  email                  String      @default("") @unique
+  encrypted_password     String      @default("")
+  failed_attempts        Int         @default(0)
+  id                     Int         @default(autoincrement()) @id
+  last_sign_in_at        DateTime?
+  last_sign_in_ip        String?
+  locked_at              DateTime?
+  remember_created_at    DateTime?
+  reset_password_sent_at DateTime?
+  reset_password_token   String?     @unique
+  sign_in_count          Int         @default(0)
+  unconfirmed_email      String?
+  unlock_token           String?
+  updated_at             DateTime
+  customers              customers[]
+  quotes                 quotes[]
+}

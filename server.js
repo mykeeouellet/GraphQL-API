@@ -1,16 +1,60 @@
 var express = require('express');
 var express_graphql = require('express-graphql');
 var {buildSchema} = require('graphql');
+// var query = require('./sql.js');
+const { Client }  = require('pg');
+const client = new Client({
+    user: 'codeboxx',
+    host: 'localhost',
+    database: 'postgres',
+    password: 'Bobek',
+    port: 5432
+});
 
+client.connect(function(error){
+    if (!!error) {
+        console.log("Unable to connect to PSQL database.")
+    } else {
+        console.log("You are connected to PSQL database.")
+    }
+});
+
+var mysql = require('mysql');
+const con = mysql.createConnection({
+  host: "localhost",
+  user: "root",
+  password: "",
+  database: "Rocket_Elevators_Information_System_development"
+});
+
+con.connect(function(error){
+    if (!!error) {
+        console.log("Unable to connect to mySQL database.");
+    } else {
+        console.log("You are connected to mySQL database.");
+    }
+});
 // GraphQL Schema
 // type Query: special root type, entry points for the request sent by client
 var schema = buildSchema(`
+    type Employee {
+        id: Int!
+        firstname: String
+        lastname: String
+        email: String
+        function: String
+    }
+    type Intervention {
+        id: Int!
+    }
     type Query {
         intervention(id: Int!): Intervention
         building(id: Int!): Building
         customer(id: Int!): Customer
         employee(id: Int!): Employee
         building_detail(id: Int!): Building_detail       
+        message: String
+        employees(id: Int!): Employee
     }
 
     type Intervention{
@@ -37,8 +81,28 @@ var schema = buildSchema(`
 
 Root Resolver
 var root = {
-    intervention: testing
+    message: () => 'Hello World!',
+    employees: getEmployees
+};
 
+function query(queryString) {
+    console.log(queryString)
+    return new Promise((resolve, reject) => {
+        con.query(queryString, function(err, result) {
+            if (err) {
+                return reject(err);
+            } 
+            return resolve(result)
+        })
+    })
+}
+// var root = {
+// intervention: testing
+// };
+
+async function getEmployees({id}) {
+    var employees = await query('SELECT * FROM employees WHERE id = ' +id )
+    return employees[0]
 };
 
 function testing()
