@@ -21,7 +21,7 @@ client.connect(function(error){
 });
 
 // mysql connection
-var mysql = require('mysql');
+var mysql = require('mysql')
 const con = mysql.createConnection({
   host: "localhost",
   user: "root",
@@ -71,7 +71,7 @@ const QueryRoot = new graphql.GraphQLObjectType({
             type: new graphql.GraphQLList(Building),
             resolve: (parent, args, context, resolveInfo) => {
               return joinMonster.default(resolveInfo, {}, sql => {
-                return client.query(sql)
+                return con.query(sql)
               })
             }
         },
@@ -82,15 +82,36 @@ const QueryRoot = new graphql.GraphQLObjectType({
             where: (buildingsTable, args, context) => `${buildingsTable}.id = ${args.id}`,
             resolve: (parent, args, context, resolveInfo) => {
             return joinMonster.default(resolveInfo, {}, sql => {
-                return client.query(sql)
+                console.log(sql);
+                return con.query(sql)
                 })
             }
         },
 
+        employees: {
+            type: new graphql.GraphQLList(Employee),
+            resolve: (parent, args, context, resolveInfo) => {
+              return joinMonster.default(resolveInfo, {}, sql => {
+                return con.query(sql)
+              })
+            }
+        },
+
+        employee: {
+            type: Employee,
+            args: { id: { type: graphql.GraphQLNonNull(graphql.GraphQLInt) } },
+            where: (employeesTable, args, context) => `${employeesTable}.id = ${args.id}`,
+            resolve: (parent, args, context, resolveInfo) => {
+            return joinMonster.default(resolveInfo, {}, sql => {
+                return con.query(sql)
+                })
+            }
+        },
     })
 
 
   })
+
 // DEFINE THE NEW TYPES: Intervention, Building, Address, Customer, Employee, Building_detail
     const Intervention = new graphql.GraphQLObjectType({
         name: 'Intervention',
@@ -119,6 +140,14 @@ const QueryRoot = new graphql.GraphQLObjectType({
           addresse: {
             type: Address,
             sqlJoin: (buildingsTable, addressesTable, args) => `${buildingsTable}.id = ${addressesTable}.entity_id`
+          },
+          customer: {
+            type: Customer,
+            sqlJoin: (buildingsTable, customersTable, args) => `${buildingsTable}.id = ${customersTable}.building_id`
+          },
+          building_detail: {
+              type: Building_detail,
+              sqlJoin: (buildingsTable, building_detailsTable, args) => `${buildingsTable}.id = ${building_detailsTable}.building_id`
           }
         })
       });
@@ -140,10 +169,10 @@ const QueryRoot = new graphql.GraphQLObjectType({
               city: { type: graphql.GraphQLString },
               postal_code: { type: graphql.GraphQLString },
               country: { type: graphql.GraphQLString },    
-              building: {
-                type: Building,
-                sqlJoin: (addressesTable, buildingsTable, args) => `${addressesTable}.entity_id = ${buildingsTable}.id`
-              }
+            //   building: {
+            //     type: Building,
+            //     sqlJoin: (addressesTable, buildingsTable, args) => `${addressesTable}.entity_id = ${buildingsTable}.id`
+            //   }
             })
           });
         
@@ -153,7 +182,60 @@ const QueryRoot = new graphql.GraphQLObjectType({
                 sqlTable: 'addresses',
                 uniqueKey: 'entity_id',
             }
-      
+
+            const Customer = new graphql.GraphQLObjectType({
+                name: 'Customer',
+                fields: () => ({
+                  id: { type: graphql.GraphQLInt },
+                  building_id: { type: graphql.GraphQLInt },
+                  company_name: { type: graphql.GraphQLString },
+                  company_contact_full_name: { type: graphql.GraphQLString },
+                 })
+            });
+            //specified the name of the table as well as the unique id of the rows inside the type's configuration object, _typeConfig. 
+            //that way, Join Monster will know how to construct a proper SQL statement for your table.
+            Customer._typeConfig = {
+                sqlTable: 'customers',
+                uniqueKey: 'buiolding_id',
+            }
+
+            const Building_detail = new graphql.GraphQLObjectType({
+                name: 'Building_detail',
+                fields: () => ({
+                  building_id: { type: graphql.GraphQLInt },
+                  information_key: { type: graphql.GraphQLString },
+                  value: { type: graphql.GraphQLString },
+                 })
+            });
+            //specified the name of the table as well as the unique id of the rows inside the type's configuration object, _typeConfig. 
+            //that way, Join Monster will know how to construct a proper SQL statement for your table.
+            Building_detail._typeConfig = {
+                sqlTable: 'building_details',
+                uniqueKey: 'building_id',
+            }
+
+            const Employee = new graphql.GraphQLObjectType({
+                name: 'Employee',
+                fields: () => ({
+                    id: { type: graphql.GraphQLInt },
+                    firstname: { type: graphql.GraphQLString },
+                    lastname: { type: graphql.GraphQLString },
+                    intervention: {
+                        type: Intervention,
+                        sqlJoin: (employeesTable, factinterventionTable, args) => `${employeesTable}.id = ${factinterventionTable}.employee_id`
+                    }
+                 })
+            });
+            //specified the name of the table as well as the unique id of the rows inside the type's configuration object, _typeConfig. 
+            //that way, Join Monster will know how to construct a proper SQL statement for your table.
+            Employee._typeConfig = {
+                sqlTable: 'employees',
+                uniqueKey: 'id',
+            }
+
+
+
+                  
 const schema = new graphql.GraphQLSchema({ 
     query: QueryRoot 
 });
