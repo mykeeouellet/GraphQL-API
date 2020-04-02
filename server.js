@@ -1,6 +1,7 @@
 var express = require('express');
 var express_graphql = require('express-graphql');
 var {buildSchema} = require('graphql');
+
 // var query = require('./sql.js');
 const { Client }  = require('pg');
 const client = new Client({
