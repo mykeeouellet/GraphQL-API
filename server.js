@@ -23,7 +23,7 @@ var mysql = require('mysql');
 const con = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "",
+  password: "Pepperm@nt1",
   database: "Rocket_Elevators_Information_System_development"
 });
 
@@ -35,29 +35,111 @@ con.connect(function(error){
     }
 });
 // GraphQL Schema
+// type Query is special schema root type, this is the entry point for the client request.
+// address: Address! belongs to one address
+// customer: Customer! belongs to one customer
+// interventions: [Intervention] belongs to many intervention
+
 var schema = buildSchema(`
+    type Query {
+        factinterventions(building_id: Int!): Intervention
+        buildings(id: Int!): Building
+        customers(id: Int!): Customer
+        employees(id: Int!): Employee
+        building_details(id: Int!): Building_detail
+    }
+
+    type Intervention {
+        building_id: Int!
+        start_date_time_intervention: String!
+        end_date_time_intervention: String
+        buildings: [Building]
+    }
+
+    type Building {
+        id: Int!
+        entity_id: Int!
+        building_administrator_full_name: String
+        addresses: [Address]
+        customer: Customer
+        interventions: [Intervention]
+        building_details: Building_detail
+        
+    }
+    
+    type Address {
+        entity_id: Int!
+        address_type: String
+        address_status: String
+        street_number: String
+        street_name: String
+        suite_or_apartment: String
+        city: String
+        postal_code: String
+        country: String
+        address_notes: String
+    }
+
+    type Customer {
+        id: Int!
+        company_name: String
+        company_contact_full_name: String
+        building: [Building]
+    }
+
     type Employee {
         id: Int!
         firstname: String
         lastname: String
         email: String
         function: String
+        building: [Building]
+        intervention: [Intervention]
     }
-    type Intervention {
+
+    type Building_detail {
         id: Int!
-    }
-    type Query {
-        message: String
-        employees(id: Int!): Employee
+        building_id: Int!
+        information_key: String
+        value: String
     }
 `);
 
-// Root Resolver
-var root = {
-    message: () => 'Hello World!',
-    employees: getEmployees
+async function getInterventions({building_id}) {
+    var interventions = await query('SELECT * FROM factinterventions WHERE building_id = ' +building_id )
+    return interventions[0]
 };
 
+async function getBuildings({id}) {
+    var buildings = await query('SELECT * FROM buildings WHERE id = ' +id )
+    return buildings[0]
+};
+
+async function getCustomers({id}) {
+    var customers = await query('SELECT * FROM customers WHERE id = ' +id )
+    return customers[0]
+};
+
+async function getEmployees({id}) {
+    var employees = await query('SELECT * FROM employees WHERE id = ' +id )
+    return employees[0]
+};
+
+async function getBuildingDetails({id}) {
+    var buildingdetails = await query('SELECT * FROM building_details WHERE id = ' +id )
+    return buildingdetails[0]
+};
+
+// Root Resolver, list of the queries and assign the function which is executed
+var root = {
+    factinterventions: getInterventions,
+    buildings: getBuildings,
+    customers: getCustomers,
+    employees: getEmployees,
+    building_details: getBuildingDetails,
+};
+
+// define what is query
 function query(queryString) {
     console.log(queryString)
     return new Promise((resolve, reject) => {
@@ -70,11 +152,6 @@ function query(queryString) {
     })
 }
 
-async function getEmployees({id}) {
-    var employees = await query('SELECT * FROM employees WHERE id = ' +id )
-    return employees[0]
-};
-
 // Create an express server and a GraphQL endpoint
 var app = express();
 app.use('/graphql', express_graphql({
@@ -84,5 +161,3 @@ app.use('/graphql', express_graphql({
 }));
 
 app.listen(4000, () => console.log('Express graphQL server now running on localhost:4000/graphql'));
-
-
