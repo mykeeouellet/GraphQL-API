@@ -1,6 +1,7 @@
 var express = require('express');
 var express_graphql = require('express-graphql');
 var {buildSchema} = require('graphql');
+// const { GraphQLObjectType, GraphQLString, GraphQLList  } = graphql;
 // var query = require('./sql.js');
 const { Client }  = require('pg');
 const client = new Client({
@@ -34,6 +35,7 @@ con.connect(function(error){
         console.log("You are connected to mySQL database.");
     }
 });
+
 // GraphQL Schema
 // type Query is special schema root type, this is the entry point for the client request.
 // address: Address! belongs to one address
@@ -105,6 +107,15 @@ var schema = buildSchema(`
     }
 `);
 
+// Root Resolver, list of the queries and assign the function which is executed
+var root = {
+    factinterventions: getInterventions,
+    buildings: getBuildings,
+    customers: getCustomers,
+    employees: getEmployees,
+    building_details: getBuildingDetails,
+};
+
 async function getInterventions({building_id}) {
     var interventions = await query('SELECT * FROM factinterventions WHERE building_id = ' +building_id )
     return interventions[0]
@@ -130,15 +141,6 @@ async function getBuildingDetails({id}) {
     return buildingdetails[0]
 };
 
-// Root Resolver, list of the queries and assign the function which is executed
-var root = {
-    factinterventions: getInterventions,
-    buildings: getBuildings,
-    customers: getCustomers,
-    employees: getEmployees,
-    building_details: getBuildingDetails,
-};
-
 // define what is query
 function query(queryString) {
     console.log(queryString)
@@ -150,7 +152,40 @@ function query(queryString) {
             return resolve(result)
         })
     })
-}
+};
+
+// async function getInterventions() {
+//     console.log("Sending Query...")
+//     var factintervention = await querypg('SELECT * FROM factintervention WHERE employee_id = 341')
+//     // for (var i = 0; i < rows.length; i++) {
+//     //     var row = rows[i];
+//     //     console.log(row.status);
+//     // }
+//     console.log("============== RETURNING OBJECT ===================")
+//     console.log(factintervention.rows)
+//     console.log("============== RETURNING FIELDS ===================")
+//     console.log("")
+//     console.log("===================================================")
+//     return factintervention
+// };
+
+function querypg(queryString) {
+    console.log("Bonjour! - PostGres -")
+    console.log(queryString)
+    return new Promise((resolve, reject) => {
+        client.query(queryString, function(err, result) {
+            if (err) {
+                console.log("error!", err)
+                return reject(err);
+            }
+            console.log("result!", result)
+            return resolve(result)
+        })
+    })
+};
+
+
+
 
 // Create an express server and a GraphQL endpoint
 var app = express();
