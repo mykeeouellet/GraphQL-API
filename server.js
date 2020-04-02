@@ -24,7 +24,7 @@ var mysql = require('mysql');
 const con = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "Pepperm@nt1",
+  password: "",
   database: "Rocket_Elevators_Information_System_development"
 });
 
@@ -56,6 +56,9 @@ var schema = buildSchema(`
         start_date_time_intervention: String!
         end_date_time_intervention: String
         buildings: [Building]
+        status: String
+        result: String
+
     }
 
     type Building {
@@ -116,9 +119,11 @@ var root = {
     building_details: getBuildingDetails,
 };
 
-async function getInterventions({building_id}) {
-    var interventions = await query('SELECT * FROM factinterventions WHERE building_id = ' +building_id )
-    return interventions[0]
+async function getInterventions() {
+    console.log("Sending Query...")
+    var factintervention = await querypg('SELECT * FROM factintervention WHERE employee_id = 341')
+    resolve = factintervention[0]
+    return resolve
 };
 
 async function getBuildings({id}) {
@@ -142,7 +147,7 @@ async function getBuildingDetails({id}) {
 };
 
 // define what is query
-function query(queryString) {
+function querymysql(queryString) {
     console.log(queryString)
     return new Promise((resolve, reject) => {
         con.query(queryString, function(err, result) {
@@ -154,20 +159,6 @@ function query(queryString) {
     })
 };
 
-// async function getInterventions() {
-//     console.log("Sending Query...")
-//     var factintervention = await querypg('SELECT * FROM factintervention WHERE employee_id = 341')
-//     // for (var i = 0; i < rows.length; i++) {
-//     //     var row = rows[i];
-//     //     console.log(row.status);
-//     // }
-//     console.log("============== RETURNING OBJECT ===================")
-//     console.log(factintervention.rows)
-//     console.log("============== RETURNING FIELDS ===================")
-//     console.log("")
-//     console.log("===================================================")
-//     return factintervention
-// };
 
 function querypg(queryString) {
     console.log("Bonjour! - PostGres -")
@@ -175,16 +166,12 @@ function querypg(queryString) {
     return new Promise((resolve, reject) => {
         client.query(queryString, function(err, result) {
             if (err) {
-                console.log("error!", err)
                 return reject(err);
             }
-            console.log("result!", result)
-            return resolve(result)
+            return resolve(result.rows)
         })
     })
 };
-
-
 
 
 // Create an express server and a GraphQL endpoint
