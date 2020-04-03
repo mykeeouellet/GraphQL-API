@@ -21,7 +21,6 @@ query {
         start_date_time_intervention
         end_date_time_intervention
     }
-}
 
 2. Retrieving customer information and the list of interventions that took place for a specific building.
 query {
@@ -33,7 +32,6 @@ query {
         interventions
     }
 }
-
 3. Retrieval of all interventions carried out by a specified employee with the buildings associated with these interventions including the details (Table BuildingDetails) associated with these buildings.
 query {
     employee(id) {
@@ -48,7 +46,6 @@ query {
         }
     }
 }
-
 
 
 
