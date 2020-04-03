@@ -3,8 +3,6 @@ const graphqlHTTP = require('express-graphql')
 const graphql = require('graphql')
 // translates the users GraphQL queries to SQL statements 
 const joinMonster = require('join-monster')
-// Simple SQL escape and format for MySQL
-// var SqlString = require('sqlstring')
 
 // postgresql connection
 const { Client } = require('pg')
@@ -73,8 +71,8 @@ const QueryRoot = new graphql.GraphQLObjectType({
         buildings: {
             type: new graphql.GraphQLList(Building),
             resolve: (parent, args, context, resolveInfo) => {
-              return joinMonster.default(resolveInfo, {}, sql => {
-                return con.query(sql)
+              return joinMonster.default(resolveInfo, {}, result => {
+                return con.query(result)
                 })
             }
         },
@@ -84,9 +82,9 @@ const QueryRoot = new graphql.GraphQLObjectType({
             args: { id: { type: graphql.GraphQLNonNull(graphql.GraphQLInt) } },
             where: (buildingsTable, args, context) => `${buildingsTable}.id = ${args.id}`,
             resolve: (parent, args, context, resolveInfo) => {
-            return joinMonster.default(resolveInfo, {}, sql => {
-                console.log(sql)
-                return con.query(sql)
+            return joinMonster.default(resolveInfo, {}, result => {
+                console.log(result)
+                return con.query(result)
                 })
             }
         },
