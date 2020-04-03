@@ -23,7 +23,7 @@ query {
 
 2. Retrieving customer information and the list of interventions that took place for a specific building.
 query {
-    building(id){
+    buildings(id: 20){
         customer {
             company_name
             company_contact_full_name              
@@ -34,14 +34,14 @@ query {
 
 3. Retrieval of all interventions carried out by a specified employee with the buildings associated with these interventions including the details (Table BuildingDetails) associated with these buildings.
 query {
-    employee(id) {
+    employees(id: 53) {
+        firstname
+        lastname
         interventions {
-            buildings {
-                building_details {
-                    building_id
-                    information_key
-                    value
-                }
+            building_detail {
+                building_id
+                information_key
+                value
             }
         }
     }
