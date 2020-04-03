@@ -1,17 +1,21 @@
-const express = require('express')
-const graphqlHTTP = require('express-graphql')
-const graphql = require('graphql')
-// translates the users GraphQL queries to SQL statements 
-const joinMonster = require('join-monster')
 
-// postgresql connection
+// =========== DEPENDENCIES ==============//
+require('dotenv').config();
+const express = require('express');
+const graphqlHTTP = require('express-graphql');
+const graphql = require('graphql'); 
+const joinMonster = require('join-monster');
+//========================================//
+
+//=============== CONNECTING TO THE DATABASES =======================//
+// == Connecting to PSQL == //
 const { Client } = require('pg')
 const client = new Client({
-  host: "localhost",
-  user: "codeboxx",
-  password: "Bobek",
-  database: "postgres"
-})
+  host: process.env.PSQL_HOST,
+  user: process.env.PSQL_USER,
+  password: process.env.PSQL_PASSWORD,
+  database: process.env.PSQL_DATABASE
+});
 client.connect(function(error){
     if (!!error) {
         console.log("Unable to connect to PSQL database.")
@@ -20,15 +24,14 @@ client.connect(function(error){
     }
 });
 
-// mysql connection
+// === MySQL Connection === //
 var mysql = require('mysql');
 const con = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "Pepperm@nt1",
-  database: "Rocket_Elevators_Information_System_development"
+  host: process.env.MYSQL_HOST,
+  user: process.env.MYSQL_USER,
+  password: process.env.MYSQL_PASSWORD,
+  database: process.env.MYSQL_DATABASE
 });
-
 con.connect(function(error){
     if (!!error) {
         console.log("Unable to connect to mySQL database.");
@@ -36,9 +39,12 @@ con.connect(function(error){
         console.log("You are connected to mySQL database.");
     }
 });
+//====================================================================//
 
-// create the schema
+
+//===================== CREATING THE SCHEMA =========================//
 // const QueryRoot defines all the fields can be queried at the first level
+//====================================================================//
 const QueryRoot = new graphql.GraphQLObjectType({
     name: 'Query',
     fields: () => ({
@@ -91,7 +97,9 @@ const QueryRoot = new graphql.GraphQLObjectType({
 
 
   })
-// DEFINE THE NEW TYPES: Intervention, Building, Address, Customer, Employee, Building_detail
+//====================== DEFINING EACH TYPE ==========================//
+//{Intervention, Building, Adress, Customer, Employee and Building_detail}
+//====================================================================//
     const Intervention = new graphql.GraphQLObjectType({
         name: 'Intervention',
         fields: () => ({
@@ -158,12 +166,13 @@ const schema = new graphql.GraphQLSchema({
     query: QueryRoot 
 });
 
-// Create an express server and a GraphQL endpoint
+
+//================= CREATING THE EXPRESS SERVER =======================//
 var app = express();
 app.use('/graphql', graphqlHTTP({
     schema: schema,
     rootValue: global,
     graphiql: true
 }));
-
 app.listen(4000, () => console.log('Express graphQL server now running on localhost:4000/graphql'));
+//====================================================================//
