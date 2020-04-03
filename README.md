@@ -51,7 +51,3 @@ Answer to the 3 questions:
         }
     }
 
-
-
-
-

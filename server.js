@@ -48,28 +48,25 @@ var schema = buildSchema(`
     type Query {
         interventions(building_id: Int!): Intervention
         buildings(id: Int!): Building
-        customers(id: Int!): Customer
         employees(id: Int!): Employee
-        building_details(id: Int!): Building_detail
+        customer(id: Int!): Customer
     }
     type Intervention {
         building_id: Int!
-        buildings: [Building]
-        start_date_time_intervention: String!
+        address: Address
+        start_date_time_intervention: String
         end_date_time_intervention: String
     }
     type Building {
         id: Int!
         building_administrator_full_name: String
-        addresse: Address
+        address: Address
         customer: Customer
-        building_detail: Building_detail
+        building_detail: [Building_detail]
+        interventions: [Intervention]
 
     }
     type Address {
-        entity_id: Int!
-        address_type: String
-        address_status: String
         street_number: String
         street_name: String
         suite_or_apartment: String
@@ -78,6 +75,7 @@ var schema = buildSchema(`
         country: String
     }
     type Customer {
+        id: Int!
         company_name: String
         company_contact_full_name: String
     }
@@ -85,13 +83,11 @@ var schema = buildSchema(`
         id: Int!
         firstname: String
         lastname: String
-        email: String
-        function: String
-        building: [Building]
-        intervention: [Intervention]
+        buildings: [Building]
+        building_detail: [Building_detail]
+        interventions: [Intervention]
     }
     type Building_detail {
-        id: Int!
         building_id: Int!
         information_key: String
         value: String
@@ -103,8 +99,11 @@ var schema = buildSchema(`
 // ( i.e employees triggers the getEmployees function or resolver )
 //====================================================================//
 var root = {
+    // first question
     interventions: getInterventions,
+    // second question
     buildings: getBuildings,
+    //third question
     employees: getEmployees,
 };
 //====================================================================//
@@ -118,41 +117,50 @@ async function getInterventions({building_id}) {
     // get intervention
     var intervention = await querypg('SELECT * FROM factintervention WHERE building_id = ' + building_id)
     resolve = intervention[0]
-    
-    // get buildings
-    buildings = await query('SELECT * FROM buildings WHERE id = ' + resolve.building_id)
-
     // get address
-    address = await query('SELECT * FROM addresses WHERE entity_id = ' + resolve.building_id)
-
-    //Get building details
-    // buildingDetails = await query('SELECT * FROM building_details WHERE building_id IN (' + StringedBuildings + ')')
-    
-    resolve['buildings']= buildings;
-
-    // resolve['buildingDetail'] = buildingDetails;  
+    address = await query('SELECT * FROM addresses WHERE entity_type = "Building" AND entity_id = ' + building_id)
+    resolve['address']= address[0];
     return resolve
 };
 
 async function getBuildings({id}) {
-    var buildings = await query('SELECT * FROM buildings WHERE id = ' +id )
-    customers = await query('SELECT * FROM customers WHERE building_id = building.id')
+    // get building
+    var buildings = await query('SELECT * FROM buildings WHERE id = ' + id )
+    resolve = buildings[0]
+    console.log(buildings)
 
-    return buildings[0]
+    // get customer
+    customer = await query('SELECT * FROM customers WHERE id = ' + resolve.customer_id)
+    console.log(customer)
+
+    // get interventions
+    // interventions = await querypg('SELECT * FROM factintervention WHERE building_id = ' + id)
+    // resolve = interventions[0]
+    // console.log(interventions)
+
+    resolve['customer']= customer;
+    // resolve['interventions']= interventions
+
+    return resolve
 };
 
 async function getEmployees({id}) {
     // get employee
-    const employee = await query('SELECT * FROM employees WHERE id = ' +id )
-    // get intervention
-    var intervention2 = await querypg('SELECT * FROM factintervention WHERE employee_id = ' + id)
-    resolve = intervention2[0]
-    // get building
+    const employees = await query('SELECT * FROM employees WHERE id = ' + id )
+    resolve = employees[0]
+    // get interventions
+    interventions = await querypg('SELECT * FROM factintervention WHERE employee_id = ' + id)
+    resolve = interventions[0]
+    // get buildings
     buildings = await query('SELECT * FROM buildings WHERE id = ' + resolve.building_id)
     // get building details
-    buildingDetails = await query('SELECT * FROM building_details WHERE building_id IN (' + StringedBuildings + ')')
+    // building_details = await query('SELECT * FROM building_details WHERE building_id = buildings.id')
 
-    return employee[0]
+    resolve['interventions']= interventions
+    resolve['buildings']= buildings
+    // resolve['building_details']=building_details
+
+    return resolve
 };
 //====================================================================//
 
@@ -162,7 +170,7 @@ async function getEmployees({id}) {
 // Each query function is defined here with their associated database 
 // connection. querymysql => MySQL // querypg => PostGreSQL .
 //====================================================================//
-function querymysql(queryString) {
+function query (queryString) {
     console.log(queryString)
     return new Promise((resolve, reject) => {
         con.query(queryString, function(err, result) {
@@ -193,9 +201,9 @@ app.use('/graphql', express_graphql({
     graphiql: true
 }));
 
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log("Express GraphQL server is running");
 });
-// app.listen(4000, () => console.log('Express graphQL server now running on localhost:4000/graphql'));
 //====================================================================//
