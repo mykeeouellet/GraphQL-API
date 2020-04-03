@@ -152,20 +152,19 @@ async function getEmployees({id}) {
     
     // get interventions
     interventions = await querypg('SELECT * FROM factintervention WHERE employee_id = ' + id)
-    resolve2 = interventions[0]
+    result = interventions[0]
     console.log(interventions)
 
 
     // get building details
-    building_details = await query('SELECT * FROM building_details WHERE building_id = ' + resolve2.building_id)
+    building_details = await query('SELECT * FROM building_details WHERE building_id = ' + result.building_id)
     console.log(building_details)
 
     resolve['interventions']= interventions;
-    resolve['building_details']= building_details[0];
+    resolve['building_details']= building_details;
 
     return resolve
-};
-//====================================================================//
+};//====================================================================//
 
 
 
