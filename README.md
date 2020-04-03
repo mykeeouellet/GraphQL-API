@@ -1,11 +1,18 @@
-
 GraphQL API // Codeboxx Week-8
-
+=============================
 This project is using Node.js and Express to create a GraphQL Api.
+The API is deployed on heroku with the GraphiQL interface at this URL
 
-Answer to the 3 questions:
+    https://rocketelevatorgraphql.herokuapp.com/graphql
+
+The goal this week was to answer 3 separate queries made to 2 different databases 
+using a GraphQL API. 
+
+The 3 requests were :
 
 1. Retrieving the address of the building, the beginning and the end of the intervention for a specific intervention.
+
+    Include this query to get back data 
 
     query {
         intervention(building_id){
@@ -25,6 +32,8 @@ Answer to the 3 questions:
 
 2. Retrieving customer information and the list of interventions that took place for a specific building.
 
+    Include this query to get back data 
+
     query {
         building(id){
             customer {
@@ -37,6 +46,8 @@ Answer to the 3 questions:
 
 3. Retrieval of all interventions carried out by a specified employee with the buildings associated with these interventions including the details (Table BuildingDetails) associated with these buildings.
 
+    Include this query to get back data 
+    
     query {
         employee(id) {
             interventions {
