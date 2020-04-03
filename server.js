@@ -54,10 +54,9 @@ var schema = buildSchema(`
 
     type Intervention {
         building_id: Int!
+        address: Address
         start_date_time_intervention: String
         end_date_time_intervention: String
-        employee_id: Int!
-        address: Address
     }
 
     type Building {
@@ -65,7 +64,7 @@ var schema = buildSchema(`
         building_administrator_full_name: String
         address: Address
         customer: Customer
-        building_detail: Building_detail
+        building_detail: [Building_detail]
         interventions: [Intervention]
 
     }
@@ -80,6 +79,7 @@ var schema = buildSchema(`
     }
 
     type Customer {
+        id: Int!
         company_name: String
         company_contact_full_name: String
     }
@@ -89,6 +89,7 @@ var schema = buildSchema(`
         firstname: String
         lastname: String
         buildings: [Building]
+        building_detail: [Building_detail]
         interventions: [Intervention]
     }
 

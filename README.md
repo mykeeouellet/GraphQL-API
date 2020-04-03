@@ -6,18 +6,19 @@ This project is using Node.js and Express to create a GraphQL Api.
 Answer to the 3 questions:
 
 1. Retrieving the address of the building, the beginning and the end of the intervention for a specific intervention.
-{
-  intervention (id: 20) {
-    address{
-      street_address
-      city
-      state
-      country
+query {
+    interventions(building_id: 20){
+        address {
+            street_number
+            street_name
+            suite_or_apartment
+            city
+            postal_code
+            country
+        }
+        start_date_time_intervention
+        end_date_time_intervention
     }
-    start_date_time_intervention
-    end_date_time_intervention
-  }
-}
 }
 
 2. Retrieving customer information and the list of interventions that took place for a specific building.
