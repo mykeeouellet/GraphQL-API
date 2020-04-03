@@ -3,6 +3,8 @@ const graphqlHTTP = require('express-graphql')
 const graphql = require('graphql')
 // translates the users GraphQL queries to SQL statements 
 const joinMonster = require('join-monster')
+// Simple SQL escape and format for MySQL
+// var SqlString = require('sqlstring')
 
 // postgresql connection
 const { Client } = require('pg')
@@ -31,9 +33,9 @@ const con = mysql.createConnection({
 
 con.connect(function(error){
     if (!!error) {
-        console.log("Unable to connect to mySQL database.");
+        console.log("Unable to connect to mySQL database.")
     } else {
-        console.log("You are connected to mySQL database.");
+        console.log("You are connected to mySQL database.")
     }
 });
 
@@ -67,12 +69,13 @@ const QueryRoot = new graphql.GraphQLObjectType({
             }
         },
 
+
         buildings: {
             type: new graphql.GraphQLList(Building),
             resolve: (parent, args, context, resolveInfo) => {
               return joinMonster.default(resolveInfo, {}, sql => {
                 return con.query(sql)
-              })
+                })
             }
         },
 
@@ -82,7 +85,7 @@ const QueryRoot = new graphql.GraphQLObjectType({
             where: (buildingsTable, args, context) => `${buildingsTable}.id = ${args.id}`,
             resolve: (parent, args, context, resolveInfo) => {
             return joinMonster.default(resolveInfo, {}, sql => {
-                console.log(sql);
+                console.log(sql)
                 return con.query(sql)
                 })
             }
@@ -137,7 +140,7 @@ const QueryRoot = new graphql.GraphQLObjectType({
         name: 'Building',
         fields: () => ({
           id: { type: graphql.GraphQLInt },
-          addresse: {
+          address: {
             type: Address,
             sqlJoin: (buildingsTable, addressesTable, args) => `${buildingsTable}.id = ${addressesTable}.entity_id`
           },
@@ -155,7 +158,7 @@ const QueryRoot = new graphql.GraphQLObjectType({
         //specified the name of the table as well as the unique id of the rows inside the type's configuration object, _typeConfig. 
         //that way, Join Monster will know how to construct a proper SQL statement for your table.
         Building._typeConfig = {
-            sqlTable: 'buildings',
+            sqlTable: 'building',
             uniqueKey: 'id',
         }
 
