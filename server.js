@@ -154,6 +154,9 @@ async function getEmployees({id}) {
 
     return employee[0]
 };
+//====================================================================//
+
+
 
 //================== DEFINING EACH QUERY FUNCTION ====================//
 // Each query function is defined here with their associated database 
