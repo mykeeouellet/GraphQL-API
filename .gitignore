@@ -1,2 +1,3 @@
 .env
 prisma/
+node_modules
