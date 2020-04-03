@@ -48,30 +48,29 @@ var schema = buildSchema(`
     type Query {
         interventions(building_id: Int!): Intervention
         buildings(id: Int!): Building
-        customers(id: Int!): Customer
         employees(id: Int!): Employee
-        building_details(id: Int!): Building_detail
+        customer(id: Int!): Customer
     }
 
     type Intervention {
         building_id: Int!
-        buildings: [Building]
-        start_date_time_intervention: String!
+        start_date_time_intervention: String
         end_date_time_intervention: String
+        employee_id: Int!
+        address: Address
     }
 
     type Building {
         id: Int!
         building_administrator_full_name: String
-        addresse: Address
+        address: Address
         customer: Customer
         building_detail: Building_detail
+        interventions: [Intervention]
+
     }
     
     type Address {
-        entity_id: Int!
-        address_type: String
-        address_status: String
         street_number: String
         street_name: String
         suite_or_apartment: String
@@ -94,7 +93,6 @@ var schema = buildSchema(`
     }
 
     type Building_detail {
-        id: Int!
         building_id: Int!
         information_key: String
         value: String
@@ -115,15 +113,10 @@ async function getInterventions({building_id}) {
     // get intervention
     var intervention = await querypg('SELECT * FROM factintervention WHERE building_id = ' + building_id)
     resolve = intervention[0]
-    
-    // get buildings
-    buildings = await query('SELECT * FROM buildings WHERE id = ' + resolve.building_id)
-
     // get address
-    address = await query('SELECT * FROM addresses WHERE entity_id = ' + resolve.building_id)
-    
-    resolve['buildings']= buildings;
-    resolve['address']= address;
+    address = await query('SELECT * FROM addresses WHERE entity_type = "Building" AND entity_id = ' + building_id)
+
+    resolve['address']= address[0];
 
     return resolve
 };
@@ -131,41 +124,45 @@ async function getInterventions({building_id}) {
 async function getBuildings({id}) {
     // get building
     var buildings = await query('SELECT * FROM buildings WHERE id = ' + id )
+    resolve = buildings[0]
+    console.log(buildings)
 
     // get customer
-    customers = await query('SELECT * FROM customers WHERE building_id = ' + id)
+    customer = await query('SELECT * FROM customers WHERE id = ' + resolve.customer_id)
+    console.log(customer)
 
-    // get intervention
-    intervention = await querypg('SELECT * FROM factintervention WHERE building_id = ' + id)
-    resolve = intervention[0]
+    // get interventions
+    // interventions = await querypg('SELECT * FROM factintervention WHERE building_id = ' + id)
+    // resolve = interventions[0]
+    // console.log(interventions)
 
-    buildings['customers']= customers
-    buildings['intervention']= intervention
+    resolve['customer']= customer;
+    // resolve['interventions']= interventions
 
-    return buildings
+    return resolve
 };
 
 async function getEmployees({id}) {
     // get employee
     const employees = await query('SELECT * FROM employees WHERE id = ' + id )
-    // get intervention
-    intervention = await querypg('SELECT * FROM factintervention WHERE employee_id = ' + id)
-    resolve = intervention[0]
-    // get building
+    resolve = employees[0]
+    // get interventions
+    interventions = await querypg('SELECT * FROM factintervention WHERE employee_id = ' + id)
+    resolve = interventions[0]
+    // get buildings
     buildings = await query('SELECT * FROM buildings WHERE id = ' + resolve.building_id)
     // get building details
-    building_details = await query('SELECT * FROM building_details WHERE building_id = buildings.id')
+    // building_details = await query('SELECT * FROM building_details WHERE building_id = buildings.id')
 
-    employee['intervention']= intervention
-    employee['buildings']= buildings
-    employee['building_details']=building_details
+    resolve['interventions']= interventions
+    resolve['buildings']= buildings
+    // resolve['building_details']=building_details
 
-    return employees
+    return resolve
 };
 
 // define what is query
 function query (queryString) {
-    console.log(queryString)
     return new Promise((resolve, reject) => {
         con.query(queryString, function(err, result) {
             if (err) {
