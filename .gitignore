@@ -1,2 +1,4 @@
 .env
 prisma/
+node_modules
+npm-debug.log
