@@ -170,7 +170,7 @@ async function getEmployees({id}) {
 // Each query function is defined here with their associated database 
 // connection. querymysql => MySQL // querypg => PostGreSQL .
 //====================================================================//
-function query (queryString) {
+function query(queryString) {
     console.log(queryString)
     return new Promise((resolve, reject) => {
         con.query(queryString, function(err, result) {
