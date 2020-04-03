@@ -50,12 +50,15 @@ var schema = buildSchema(`
         buildings(id: Int!): Building
         employees(id: Int!): Employee
     }
+
     type Intervention {
         building_id: Int!
-        address: Address
         start_date_time_intervention: String
         end_date_time_intervention: String
+        employee_id: Int!
+        address: Address
     }
+
     type Building {
         id: Int!
         building_administrator_full_name: String
@@ -63,8 +66,8 @@ var schema = buildSchema(`
         customer: Customer
         building_detail: Building_detail
         interventions: [Intervention]
-
     }
+    
     type Address {
         street_number: String
         street_name: String
@@ -73,18 +76,20 @@ var schema = buildSchema(`
         postal_code: String
         country: String
     }
+
     type Customer {
-        id: Int!
         company_name: String
         company_contact_full_name: String
     }
+
     type Employee {
         id: Int!
         firstname: String
         lastname: String
-        building_detail: Building_detail
         interventions: [Intervention]
+        building_detail: Building_detail
     }
+
     type Building_detail {
         building_id: Int!
         information_key: String
@@ -117,7 +122,9 @@ async function getInterventions({building_id}) {
     resolve = intervention[0]
     // get address
     address = await query('SELECT * FROM addresses WHERE entity_type = "Building" AND entity_id = ' + building_id)
+
     resolve['address']= address[0];
+
     return resolve
 };
 
@@ -146,13 +153,15 @@ async function getEmployees({id}) {
     // get interventions
     interventions = await querypg('SELECT * FROM factintervention WHERE employee_id = ' + id)
     resolve2 = interventions[0]
+    console.log(interventions)
+
 
     // get building details
-    building_detail = await query('SELECT * FROM building_details WHERE building_id = ' + resolve2.building_id)
-    console.log(building_detail)
+    building_details = await query('SELECT * FROM building_details WHERE building_id = ' + resolve2.building_id)
+    console.log(building_details)
 
     resolve['interventions']= interventions;
-    resolve['building_detail']= building_detail;
+    resolve['building_details']= building_details[0];
 
     return resolve
 };
@@ -162,7 +171,7 @@ async function getEmployees({id}) {
 
 //================== DEFINING EACH QUERY FUNCTION ====================//
 // Each query function is defined here with their associated database 
-// connection. querymysql => MySQL // querypg => PostGreSQL .
+// connection. query => MySQL // querypg => PostGreSQL .
 //====================================================================//
 function query (queryString) {
     console.log(queryString)
