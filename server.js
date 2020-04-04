@@ -155,7 +155,6 @@ async function getEmployees({id}) {
     result = interventions[0]
     console.log(interventions)
 
-
     // get building details
     building_details = await query('SELECT * FROM building_details WHERE building_id = ' + result.building_id)
     console.log(building_details)
