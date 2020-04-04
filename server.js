@@ -53,6 +53,7 @@ var schema = buildSchema(`
 
     type Intervention {
         building_id: Int!
+        building_details: [Building_detail]
         start_date_time_intervention: String
         end_date_time_intervention: String
         employee_id: Int!
@@ -64,8 +65,9 @@ var schema = buildSchema(`
         building_administrator_full_name: String
         address: Address
         customer: Customer
-        building_detail: Building_detail
+        building_details: [Building_detail]
         interventions: [Intervention]
+
     }
     
     type Address {
@@ -86,8 +88,8 @@ var schema = buildSchema(`
         id: Int!
         firstname: String
         lastname: String
+        building_details: [Building_detail]
         interventions: [Intervention]
-        building_detail: Building_detail
     }
 
     type Building_detail {
@@ -118,7 +120,7 @@ var root = {
 //====================================================================//
 async function getInterventions({building_id}) {
     // get intervention
-    var intervention = await querypg('SELECT * FROM factintervention WHERE building_id = ' + building_id)
+    var intervention = await querypg('SELECT * FROM "factintervention" WHERE building_id = ' + building_id)
     resolve = intervention[0]
     // get address
     address = await query('SELECT * FROM addresses WHERE entity_type = "Building" AND entity_id = ' + building_id)
@@ -134,7 +136,7 @@ async function getBuildings({id}) {
     resolve = buildings[0]
 
     // get interventions
-    interventions = await querypg('SELECT * FROM factintervention WHERE building_id = ' + id)
+    interventions = await querypg('SELECT * FROM "factintervention" WHERE building_id = ' + id)
 
     // get customer
     customer = await query('SELECT * FROM customers WHERE id = ' + resolve.customer_id)
@@ -151,7 +153,7 @@ async function getEmployees({id}) {
     resolve = employees[0]
     
     // get interventions
-    interventions = await querypg('SELECT * FROM factintervention WHERE employee_id = ' + id)
+    interventions = await querypg('SELECT * FROM "factintervention" WHERE employee_id = ' + id)
     result = interventions[0]
     console.log(interventions)
 
