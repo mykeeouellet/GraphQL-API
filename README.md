@@ -1,12 +1,17 @@
-
 GraphQL API // Codeboxx Week-8
-
+=============================
 This project is using Node.js and Express to create a GraphQL Api.
+The API is deployed on heroku with the GraphiQL interface at this URL
 
-Answer to the 3 questions:
+    https://rocketelevatorgraphql.herokuapp.com/graphql
+
+The goal this week was to answer 3 separate queries made to 2 different databases 
+using a GraphQL API. 
+
+The 3 requests were :
 
 1. Retrieving the address of the building, the beginning and the end of the intervention for a specific intervention.
-Please try intervention building_id between 1 - 20 to get address.
+Include this query to get back data and enter intervention building_id between 1 - 20 to get the building address.
 
 query {
     interventions(building_id: 20){
@@ -17,14 +22,15 @@ query {
             city
             postal_code
             country
-        }
+       }
         start_date_time_intervention
         end_date_time_intervention
     }
 }
 
 2. Retrieving customer information and the list of interventions that took place for a specific building.
-Please try building id between 1 - 20 to get customer.
+Include this query to get back data and enter building id between 1 - 20 to get the customer details.
+
 query {
     buildings(id: 20){
         customer {
@@ -38,7 +44,7 @@ query {
 }
 
 3. Retrieval of all interventions carried out by a specified employee with the buildings associated with these interventions including the details (Table BuildingDetails) associated with these buildings.
-Please try employee id: 1, 2, 17, 45, 51, 53 to get building details
+Include this query to get back data and enter one of these employee id: 1, 2, 17, 45, 51, 53 to get building details.
 
 query {
     employees(id: 53) {
