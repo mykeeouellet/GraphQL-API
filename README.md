@@ -52,17 +52,17 @@ query {
         lastname
         interventions{
             building_id
-        }
-        building_details {
-            building_id
-            information_key
-            value
+            building_details {
+                building_id
+                information_key
+                value
+            }
         }
     }
 }
 
 
-
+https://rocketelevatorgraphql.herokuapp.com/graphql
 
 
 
