@@ -21,10 +21,10 @@ client.connect(function(error){
 
 var mysql = require('mysql');
 const con = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "Pepperm@nt1",
-  database: "Rocket_Elevators_Information_System_development"
+  host: 'localhost',
+  user: 'root',
+  password: 'Bobek',
+  database: 'Rocket_Elevator_Foundation_development'
 });
 
 con.connect(function(error){
@@ -46,6 +46,18 @@ var schema = buildSchema(`
         interventions(building_id: Int!): Intervention
         buildings(id: Int!): Building
         employees(id: Int!): Employee
+        chatbot: Chatbot
+    }
+
+    type Chatbot {
+        nb_elevators: Int 
+        nb_buildings: Int
+        nb_customers: Int
+        nb_not_active_elevators: Int
+        nb_batteries: Int
+        nb_cities: Int
+        nb_quotes: Int
+        nb_leads: Int
     }
 
     type Intervention {
@@ -104,6 +116,8 @@ var root = {
     buildings: getBuildings,
     //third question
     employees: getEmployees,
+    //Google ChatBot
+    chatbot: getChatBot
 };
 
 async function getInterventions({building_id}) {
@@ -157,6 +171,65 @@ async function getEmployees({id}) {
     return resolve
 };
 
+async function getChatBot(){
+
+    // [ RowDataPacket { nb_elevators: 770 } ] I received an object in response with array.
+    // I have the value of the property as a response, however it comes inside an array, using [0] access the first index of this array.
+
+    // get the number of elevators
+    var nb_elevators =  await query('SELECT COUNT(id) AS nb_elevators FROM elevators')
+    resolve = nb_elevators
+    console.log(nb_elevators)
+    let nb_elevators_json = JSON.parse(JSON.stringify(nb_elevators[0]))
+    console.log(nb_elevators_json)
+
+    // get the number of not active elevators
+    nb_not_active_elevators = await query('SELECT COUNT(id) AS nb_not_active_elevators FROM elevators WHERE elevator_status != "Active" ')
+    let nb_not_active_elevators_json = JSON.parse(JSON.stringify( nb_not_active_elevators[0]))
+    console.log(nb_not_active_elevators_json)
+
+    // get the number of building
+    nb_buildings =  await query('SELECT COUNT(id) AS nb_buildings FROM buildings')
+    let nb_buildings_json = JSON.parse(JSON.stringify(nb_buildings[0]))
+    console.log(nb_buildings_json)
+
+    // get the number of customers
+    nb_customers =  await query('SELECT COUNT(id) AS nb_customers FROM customers')
+    let nb_customers_json = JSON.parse(JSON.stringify(nb_customers[0]))
+    console.log(nb_customers_json)
+    
+    // get the number of batteries
+    nb_batteries =  await query('SELECT COUNT(id) AS nb_batteries FROM batteries')
+    let nb_batteries_json = JSON.parse(JSON.stringify(nb_batteries[0]))
+    console.log(nb_batteries_json)
+
+    // get the number of cities
+    nb_cities =  await query('SELECT COUNT(city) AS nb_cities FROM addresses WHERE entity_type = "Building"')
+    let nb_cities_json = JSON.parse(JSON.stringify(nb_cities[0]))
+    console.log(nb_cities_json)
+
+    // get the number of queries
+    nb_quotes =  await query('SELECT COUNT(id) AS nb_quotes FROM quotes')
+    let nb_quotes_json = JSON.parse(JSON.stringify(nb_quotes[0]))
+    console.log(nb_quotes_json)
+
+    // get the number of leads
+    nb_leads =  await query('SELECT COUNT(id) AS nb_leads FROM leads')
+    let nb_leads_json = JSON.parse(JSON.stringify(nb_leads[0]))
+    console.log(nb_leads_json)
+  
+    resolve['nb_elevators'] = nb_elevators_json['nb_elevators']
+    resolve['nb_not_active_elevators'] = nb_not_active_elevators_json['nb_not_active_elevators'];
+    resolve['nb_buildings'] = nb_buildings_json['nb_buildings'];
+    resolve['nb_customers'] = nb_customers_json['nb_customers'];
+    resolve['nb_batteries'] = nb_batteries_json['nb_batteries'];
+    resolve['nb_cities'] = nb_cities_json['nb_cities'];        
+    resolve['nb_quotes'] = nb_quotes_json['nb_quotes'];
+    resolve['nb_leads'] = nb_leads_json['nb_leads'];
+
+    return resolve
+};
+
 // define what is query
 function query (queryString) {
     return new Promise((resolve, reject) => {
@@ -170,7 +243,7 @@ function query (queryString) {
 };
 
 // define what is querypg
-function querypg(queryString) {
+function querypg (queryString) {
     return new Promise((resolve, reject) => {
         client.query(queryString, function(err, result) {
             if (err) {

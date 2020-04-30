@@ -59,6 +59,20 @@ query {
     }
 }
 
+4. Google ChatBot query
+
+{
+  chatbot {
+    nb_elevators
+    nb_buildings
+    nb_customers
+    nb_not_active_elevators
+    nb_quotes
+    nb_leads
+    nb_batteries
+    nb_cities    
+  }
+}
 
 https://rocketelevatorgraphql.herokuapp.com/graphql
 
