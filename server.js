@@ -44,11 +44,31 @@ con.connect(function(error){
 //=========== CREATING THE SCHEMA AND DEFINING EACH TYPE =============//
 // Query is special schema root type, this is the entry point for the client request.
 //====================================================================//
+
+// Greetings
+// There are currently XXX elevators deployed in the XXX buildings of your XXX customers
+// Currently, XXX elevators are not in Running Status and are being serviced
+// XXX Batteries are deployed across XXX cities
+// On another note you currently have XXX quotes awaiting processing
+// You also have XXX leads in your contact requests
+
 var schema = buildSchema(`
     type Query {
         interventions(building_id: Int!): Intervention
         buildings(id: Int!): Building
         employees(id: Int!): Employee
+        chatbot: Chatbot
+    }
+
+    type Chatbot {
+        nb_elevators: Int
+        nb_buildings: Int
+        nb_customers: Int
+        nb_not_active_elevators: Int
+        nb_batteries: Int
+        nb_cities: Int
+        nb_quotes: Int
+        nb_leads: Int
     }
 
     type Intervention {
@@ -67,7 +87,6 @@ var schema = buildSchema(`
         customer: Customer
         building_details: [Building_detail]
         interventions: [Intervention]
-
     }
     
     type Address {
@@ -110,6 +129,8 @@ var root = {
     buildings: getBuildings,
     //third question
     employees: getEmployees,
+    //Google chatbot
+    chatbot: getChatBot,
 };
 //====================================================================//
 
@@ -166,7 +187,27 @@ async function getEmployees({id}) {
     resolve['building_details']= building_details;
 
     return resolve
-};//====================================================================//
+};
+
+async function getChatBot(){
+    // get the number of elevators
+    var nb_elevator =  await query('SELECT id, SUM(id) AS nb_elevator FROM elevators')
+    resolve = nb_elevator
+
+    // get the not active elevators
+    nb_not_active_elevators = await query('SELECT id, SUM(id) AS nb_not_active_elevators FROM elevators WHERE status != "Active" ')
+    // get the number of building
+    // get the number of customers
+    // get the number of batteries
+    // get the number of queries
+    // get the number of leads
+    // get the number of cities
+    resolve['nb_not_active_elevators'] = nb_not_active_elevators;
+
+    return resolve
+};
+
+//====================================================================//
 
 
 
