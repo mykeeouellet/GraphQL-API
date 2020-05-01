@@ -58,6 +58,22 @@ var schema = buildSchema(`
         buildings(id: Int!): Building
         employees(id: Int!): Employee
         chatbot: Chatbot
+        chatbot2(id: Int!): Elevator
+    }
+
+    type Elevator {
+        elevator_serial_number: String
+        elevator_model: String
+        building_type: String
+        elevator_status: String
+        elevator_commissioning_date: String
+        elevator_last_inspection_date: String
+        elevator_inspection_certificate: String
+        elevator_information: String
+        elevator_notes: String
+        created_at: String
+        updated_at: String
+        column_id: Int
     }
 
     type Chatbot {
@@ -129,8 +145,10 @@ var root = {
     buildings: getBuildings,
     //third question
     employees: getEmployees,
-    //Google ChatBot
-    chatbot: getChatBot
+    //Google ChatBot for brief
+    chatbot: getChatBot,
+    //Google ChatBot for elevator status
+    chatbot2: getChatBot2
 };
 //====================================================================//
 
@@ -248,6 +266,13 @@ async function getChatBot(){
     return resolve
 };
 
+async function getChatBot2({id}){
+    var elevators = await query('SELECT * FROM elevators WHERE id = ' + id )
+    resolve = elevators[0]
+    console.log(elevators)
+
+    return resolve
+};
 //====================================================================//
 
 

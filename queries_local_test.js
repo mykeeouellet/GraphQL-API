@@ -47,6 +47,22 @@ var schema = buildSchema(`
         buildings(id: Int!): Building
         employees(id: Int!): Employee
         chatbot: Chatbot
+        chatbot2(id: Int!): Elevator
+    }
+
+    type Elevator {
+        elevator_serial_number: String
+        elevator_model: String
+        building_type: String
+        elevator_status: String
+        elevator_commissioning_date: String
+        elevator_last_inspection_date: String
+        elevator_inspection_certificate: String
+        elevator_information: String
+        elevator_notes: String
+        created_at: String
+        updated_at: String
+        column_id: Int
     }
 
     type Chatbot {
@@ -76,7 +92,6 @@ var schema = buildSchema(`
         customer: Customer
         building_details: [Building_detail]
         interventions: [Intervention]
-
     }
     
     type Address {
@@ -108,7 +123,10 @@ var schema = buildSchema(`
     }
 `);
 
-// The root provides a resolver function for each API endpoint
+//====== LISTING THE POSSIBLE QUERIES AND ASSIGNING RESOLVERS ========//
+// This is where we assign resolver to GraphQL queries.
+// ( i.e employees triggers the getEmployees function or resolver )
+//====================================================================//
 var root = {
     // first question
     interventions: getInterventions,
@@ -116,18 +134,24 @@ var root = {
     buildings: getBuildings,
     //third question
     employees: getEmployees,
-    //Google ChatBot
-    chatbot: getChatBot
+    //Google ChatBot for brief
+    chatbot: getChatBot,
+    //Google ChatBot for elevator status
+    chatbot2: getChatBot2
 };
+//====================================================================//
 
+//======= DEFINING EACH RESOLVER FUNCTION WITH ITS SQL QUERY =========//
+// This is where the resolver functions are defined. When they are called
+// the associated SQL query that we need will be sent to the databases with
+// the right query function (i.e {await querypg('SELECT * FROM ....')});
+//====================================================================//
 async function getInterventions({building_id}) {
     // get intervention
-    var intervention = await querypg('SELECT * FROM factintervention WHERE building_id = ' + building_id)
+    var intervention = await querypg('SELECT * FROM "factintervention" WHERE building_id = ' + building_id)
     resolve = intervention[0]
-    console.log(intervention)
     // get address
     address = await query('SELECT * FROM addresses WHERE entity_type = "Building" AND entity_id = ' + building_id)
-    console.log(address)
 
     resolve['address']= address[0];
 
@@ -140,7 +164,7 @@ async function getBuildings({id}) {
     resolve = buildings[0]
 
     // get interventions
-    interventions = await querypg('SELECT * FROM factintervention WHERE building_id = ' + id)
+    interventions = await querypg('SELECT * FROM "factintervention" WHERE building_id = ' + id)
 
     // get customer
     customer = await query('SELECT * FROM customers WHERE id = ' + resolve.customer_id)
@@ -157,16 +181,17 @@ async function getEmployees({id}) {
     resolve = employees[0]
     
     // get interventions
-    interventions = await querypg('SELECT * FROM factintervention WHERE employee_id = ' + id)
+    interventions = await querypg('SELECT * FROM "factintervention" WHERE employee_id = ' + id)
     result = interventions[0]
     console.log(interventions)
+
 
     // get building details
     building_details = await query('SELECT * FROM building_details WHERE building_id = ' + result.building_id)
     console.log(building_details)
 
     resolve['interventions']= interventions;
-    result['building_details']= building_details;
+    resolve['building_details']= building_details;
 
     return resolve
 };
@@ -226,6 +251,14 @@ async function getChatBot(){
     resolve['nb_cities'] = nb_cities_json['nb_cities'];        
     resolve['nb_quotes'] = nb_quotes_json['nb_quotes'];
     resolve['nb_leads'] = nb_leads_json['nb_leads'];
+
+    return resolve
+};
+
+async function getChatBot2({id}){
+    var elevators = await query('SELECT * FROM elevators WHERE id = ' + id )
+    resolve = elevators[0]
+    console.log(elevators)
 
     return resolve
 };
